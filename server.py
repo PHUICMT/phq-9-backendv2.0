@@ -1,42 +1,57 @@
 from flask import Flask, request
 from flask_socketio import SocketIO, emit
+from engineio.payload import Payload
 from io import StringIO
 from PIL import Image
+from deepface import DeepFace
 import numpy as np
 import io
 import cv2, base64
+import json
 
 app = Flask(__name__)
 app.secret_key = '1111'
 socketio = SocketIO(app, cors_allowed_origins="*")
+Payload.max_decode_packets = 500
+
+models = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib", "SFace"]
+backends = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface', 'mediapipe']
+
+print("[INFO] Server is started...")
 
 @socketio.on('image')
-def image(data_image):
-    sbuf = StringIO()
-    sbuf.write(data_image)
+def image(data_image): #Base64 encoded image
+    time_stamp = data_image['timeStamp']
+    image_base64 = data_image['imageBase64']
 
-    # decode and convert into image
-    # b = io.BytesIO(base64.b64decode(data_image))
-    print("---------------------------------------------------------------")
-    print(data_image)
-    # pimg = Image.open(b)
+    print("[INFO] Image received...")
 
-    ## converting RGB to BGR, as opencv standards
-    # frame = cv2.cvtColor(np.array(pimg), cv2.COLOR_RGB2BGR)
+    # Decode image
+    try:
+        image_base64_decoded = base64.b64decode(image_base64)
+        image_bytes = io.BytesIO(image_base64_decoded)
+        image_file = Image.open(image_bytes)
+        image_array = np.array(image_file)
+    except:
+        print("[ERROR] Image decoding failed...")
+        return
 
-    # # Process the image frame
-    # frame = imutils.resize(frame, width=700)
-    # frame = cv2.flip(frame, 1)
-    # imgencode = cv2.imencode('.jpeg', frame)[1]
+    # Detect faces emotion
+    print("[INFO] Detecting faces...")
+    try: 
+        result_obj = DeepFace.analyze(img_path = image_array, actions = ['emotion'], enforce_detection=False)
+    except:
+        result_obj = {"dominant_emotion": "Unknown"}
+        
 
-    # # base64 encode
-    # stringData = base64.b64encode(imgencode).decode('utf-8')
-    # b64_src = 'data:image/jpeg;base64,'
-    # stringData = b64_src + stringData
+    print("[INFO] Faces detected...")
+    print("Emote : " + result_obj["dominant_emotion"] + " Time : " + str(time_stamp))
 
-    # emit the frame back
-    # emit('response_back', stringData)
-    emit('response_back', data_image)
+    try:
+        emit('response_back', result_obj) #Response back
+    except:
+        print("[ERROR] Cannot send response back...")
+        pass
     
 
 if __name__ == '__main__':
