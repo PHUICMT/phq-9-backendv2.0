@@ -10,7 +10,7 @@ import cv2, base64
 import json
 
 app = Flask(__name__)
-app.secret_key = '1111'
+app.secret_key = 'PHQ@9@PHU@P@NON'
 socketio = SocketIO(app, cors_allowed_origins="*")
 Payload.max_decode_packets = 500
 
