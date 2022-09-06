@@ -9,11 +9,12 @@ import io
 import cv2, base64
 import json
 
+from ServerTask import *
+
 app = Flask(__name__)
 app.secret_key = 'PHQ@9@PHU@P@NON'
 socketio = SocketIO(app, cors_allowed_origins="*")
 Payload.max_decode_packets = 500
-video_out = None
 
 # Not use for now
 models = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib", "SFace"]
@@ -21,42 +22,49 @@ backends = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface', 'mediapipe']
 
 print("[INFO] Server is started...")
 
-video_path = "./video_storage/"
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
-imageWidth = 400
-imageHeight = 300
-fps = 6
+directory_operation = DirectoryTask()
+file_operation = FileTask()
+general_operation = GeneralTask()
 
 @socketio.on('user_connected')
 def client_connect(user_data):
-    print("[INFO] Client connected...")
-    user_email = user_data['user_email']
-    user_id = user_data['user_id']
-    file_name = user_email + "_" + user_id + ".avi"
-    video_out = cv2.VideoWriter(video_path + file_name, fourcc, fps, (imageWidth, imageHeight))
+    print("[INFO] Client connected...")    
+    saved_image_path = general_operation.get_image_path(user_data)
+    saved_video_path = general_operation.get_video_path(user_data)
+    
+    print("[INFO] Image file path: ", saved_image_path)
+    print("[INFO] Video file path: ", saved_video_path)
+
+    directory_operation.create_image_directory(saved_image_path)
+    directory_operation.create_video_directory(saved_video_path)
 
 @socketio.on('disconnect')
-def disconnected():
+def disconnected(user_data):
     print("[INFO] Client disconnected...")
-    # if video_out is not None:
-    #     video_out.release()
-    #     video_out = None
+    saved_image_path = general_operation.get_image_path(user_data)
+    saved_video_path = general_operation.get_video_path(user_data)
+    video_path = saved_video_path + "/" + user_data['user_email'] + user_data['user_id'] + ".mp4"
+
+    file_operation.save_video(saved_image_path, video_path)
+    
 
 @socketio.on('image')
 def image(data_image): # Base64 encoded image
     print("[INFO] Image received...")
     time_stamp = data_image['timeStamp']
     image_base64 = data_image['imageBase64']
-
+    image_file_path = general_operation.get_image_path(data_image) + "/" + str(time_stamp) + ".jpg"
+    
+    print("[INFO]-[onImage] Image file path: ", image_file_path)
+    
     # Decode image
     try:
         image_base64_decoded = base64.b64decode(image_base64)
         image_bytes = io.BytesIO(image_base64_decoded)
         image_file = Image.open(image_bytes)
         image_array = np.array(image_file)
-
-        if video_out is not None:
-            video_out.write(cv2.imdecode(np.fromstring(image_base64_decoded, dtype=np.uint8), cv2.IMREAD_COLOR))
+        
+        file_operation.save_image(image_file_path, image_base64_decoded)
     except:
         print("[ERROR] Image decoding failed...")
         return
