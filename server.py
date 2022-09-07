@@ -13,7 +13,7 @@ from ServerTask import *
 
 app = Flask(__name__)
 app.secret_key = 'PHQ@9@PHU@P@NON'
-socketio = SocketIO(app, cors_allowed_origins="*")
+socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True , ping_timeout=60, ping_interval=60)
 Payload.max_decode_packets = 500
 
 # Not use for now
@@ -38,14 +38,18 @@ def client_connect(user_data):
     directory_operation.create_image_directory(saved_image_path)
     directory_operation.create_video_directory(saved_video_path)
 
-@socketio.on('disconnect')
-def disconnected(user_data):
-    print("[INFO] Client disconnected...")
+@socketio.on('end_section')
+def end_section(user_data):
+    print("[INFO] Client ending section...")
     saved_image_path = general_operation.get_image_path(user_data)
     saved_video_path = general_operation.get_video_path(user_data)
     video_path = saved_video_path + "/" + user_data['user_email'] + user_data['user_id'] + ".mp4"
 
     file_operation.save_video(saved_image_path, video_path)
+    
+@socketio.on('disconnect')
+def disconnect():
+    print("[INFO] Client disconnected...")
     
 
 @socketio.on('image')
@@ -80,11 +84,11 @@ def image(data_image): # Base64 encoded image
     print("[INFO] Faces detected...")
     print("Emote : " + result_obj["dominant_emotion"] + " Time : " + str(time_stamp))
 
-    try:
-        emit('response_back', result_obj) #Response back
-    except:
-        print("[ERROR] Cannot send response back...")
-        pass
+    # try:
+    #     emit('response_back', result_obj) #Response back
+    # except:
+    #     print("[ERROR] Cannot send response back...")
+    #     pass
     
 
 if __name__ == '__main__':
