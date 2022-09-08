@@ -45,7 +45,11 @@ def end_section(user_data):
     saved_video_path = general_operation.get_video_path(user_data)
     video_path = saved_video_path + "/" + user_data['user_email'] + user_data['user_id'] + ".mp4"
 
-    file_operation.save_video(saved_image_path, video_path)
+    save_result = file_operation.save_video(saved_image_path, video_path)
+    if save_result:
+        print("[INFO] Video is saved...")
+        emit('start_disconect')
+        
     
 @socketio.on('disconnect')
 def disconnect():
