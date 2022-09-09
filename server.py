@@ -13,7 +13,7 @@ from ServerTask import *
 
 app = Flask(__name__)
 app.secret_key = 'PHQ@9@PHU@P@NON'
-socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=True , ping_timeout=60, ping_interval=60)
+socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=False , ping_timeout=60, ping_interval=60)
 Payload.max_decode_packets = 500
 
 # Not use for now
@@ -87,12 +87,13 @@ def image(data_image): # Base64 encoded image
 
     print("[INFO] Faces detected...")
     print("Emote : " + result_obj["dominant_emotion"] + " Time : " + str(time_stamp))
-
-    # try:
-    #     emit('response_back', result_obj) #Response back
-    # except:
-    #     print("[ERROR] Cannot send response back...")
-    #     pass
+    
+@app.route("/send-result", methods=['POST'])
+def get_resutl():
+    print("[INFO] Result received...")
+    result = request.get_json()
+    print(result)
+    return "OK"
     
 
 if __name__ == '__main__':
