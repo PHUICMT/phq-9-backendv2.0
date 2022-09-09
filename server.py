@@ -98,7 +98,6 @@ def image(data_image): # Base64 encoded image
     except:
         result_obj = {"dominant_emotion": "Unknown"}
         
-
     print("[INFO] Faces detected...")
     articleStr = str(article)
     resultStr = result_obj["dominant_emotion"]
@@ -107,17 +106,6 @@ def image(data_image): # Base64 encoded image
         emotion_result[articleStr][resultStr] = current_emotion + 1
     except:
         print("[INFO] Emotion not found...")
-    # print(emotion_result)
-    # emit('emotion', emotion_result)
-    
-    
-@app.route("/send-result", methods=['POST'])
-def get_resutl():
-    print("[INFO] Result received...")
-    result = request.get_json()
-    print(result)
-    return "OK"
-    
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=9000)
