@@ -13,12 +13,24 @@ from ServerTask import *
 
 app = Flask(__name__)
 app.secret_key = 'PHQ@9@PHU@P@NON'
-socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=False , ping_timeout=60, ping_interval=60)
+socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=False , ping_timeout=600, ping_interval=600, async_handlers=True)
 Payload.max_decode_packets = 500
 
 # Not use for now
-models = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib", "SFace"]
-backends = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface', 'mediapipe']
+# models = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib", "SFace"]
+# backends = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface', 'mediapipe']
+
+emotion_result = {
+   "1": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "2": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "3": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "4": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "5": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "6": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "7": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "8": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "9": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+}
 
 print("[INFO] Server is started...")
 
@@ -48,7 +60,8 @@ def end_section(user_data):
     save_result = file_operation.save_video(saved_image_path, video_path)
     if save_result:
         print("[INFO] Video is saved...")
-        emit('start_disconect')
+        emit('emotion', emotion_result)
+        emit('start_disconect', True) #TODO send report to client
         
     
 @socketio.on('disconnect')
@@ -61,9 +74,10 @@ def image(data_image): # Base64 encoded image
     print("[INFO] Image received...")
     time_stamp = data_image['timeStamp']
     image_base64 = data_image['imageBase64']
+    article = data_image['article']
     image_file_path = general_operation.get_image_path(data_image) + "/" + str(time_stamp) + ".jpg"
     
-    print("[INFO]-[onImage] Image file path: ", image_file_path)
+    print("[INFO] [On Image] Image file path: ", image_file_path)
     
     # Decode image
     try:
@@ -86,7 +100,16 @@ def image(data_image): # Base64 encoded image
         
 
     print("[INFO] Faces detected...")
-    print("Emote : " + result_obj["dominant_emotion"] + " Time : " + str(time_stamp))
+    articleStr = str(article)
+    resultStr = result_obj["dominant_emotion"]
+    try:
+        current_emotion = emotion_result[articleStr][resultStr]
+        emotion_result[articleStr][resultStr] = current_emotion + 1
+    except:
+        print("[INFO] Emotion not found...")
+    # print(emotion_result)
+    # emit('emotion', emotion_result)
+    
     
 @app.route("/send-result", methods=['POST'])
 def get_resutl():
