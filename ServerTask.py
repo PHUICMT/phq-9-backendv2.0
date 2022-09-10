@@ -76,5 +76,27 @@ class GeneralTask:
         user_id = user_data['user_id']
         saved_video_path = video_path + user_email + "_" + user_id
         return saved_video_path
+    
+    @staticmethod
+    def get_emotion_result_percentage(result):
+        result_percentage = {
+            "1": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "2": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "3": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "4": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "5": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "6": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "7": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "8": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+            "9": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+        }
+        for article, emote_dict in result.items():
+            sum_emote = sum(emote_dict.values())
+            for emote, value in emote_dict.items():
+                result_percentage[article][emote] = (value * 100) / sum_emote
+        return result_percentage
+        
+    
+    
 
     

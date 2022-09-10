@@ -60,8 +60,9 @@ def end_section(user_data):
     save_result = file_operation.save_video(saved_image_path, video_path)
     if save_result:
         print("[INFO] Video is saved...")
-        emit('emotion', emotion_result)
-        emit('start_disconect', True) #TODO send report to client
+        emotion_result_percentage = general_operation.get_emotion_result_percentage(emotion_result)
+        emit('emotion', emotion_result_percentage)
+        emit('start_disconect') 
         
     
 @socketio.on('disconnect')
