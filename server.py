@@ -16,10 +16,6 @@ app.secret_key = 'PHQ@9@PHU@P@NON'
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=False , ping_timeout=600, ping_interval=600, async_handlers=True)
 Payload.max_decode_packets = 500
 
-# Not use for now
-# models = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "DeepID", "ArcFace", "Dlib", "SFace"]
-# backends = ['opencv', 'ssd', 'dlib', 'mtcnn', 'retinaface', 'mediapipe']
-
 emotion_result = {
    "1": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
    "2": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
@@ -62,16 +58,15 @@ def end_section(user_data):
         print("[INFO] Video is saved...")
         emotion_result_percentage = general_operation.get_emotion_result_percentage(emotion_result)
         emit('emotion', emotion_result_percentage)
-        emit('start_disconect') 
         
-    
 @socketio.on('disconnect')
 def disconnect():
     print("[INFO] Client disconnected...")
     
 
 @socketio.on('image')
-def image(data_image): # Base64 encoded image
+def image(data_image): 
+    # Base64 encoded image
     print("[INFO] Image received...")
     time_stamp = data_image['timeStamp']
     image_base64 = data_image['imageBase64']

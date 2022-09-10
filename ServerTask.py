@@ -93,7 +93,11 @@ class GeneralTask:
         for article, emote_dict in result.items():
             sum_emote = sum(emote_dict.values())
             for emote, value in emote_dict.items():
-                result_percentage[article][emote] = (value * 100) / sum_emote
+                try:
+                    result_percentage[article][emote] = (value * 100) / sum_emote
+                except:
+                    result_percentage[article][emote] = 0.0
+                    
         return result_percentage
         
     
