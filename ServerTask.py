@@ -64,17 +64,15 @@ class GeneralTask:
     @staticmethod
     def get_image_path(user_data):
         image_path = "./images_storage/"
-        user_email = user_data['user_email']
         user_id = user_data['user_id']
-        saved_image_path = image_path + user_email + "_" + user_id
+        saved_image_path = image_path + "_" + user_id
         return saved_image_path
 
     @staticmethod
     def get_video_path(user_data):
         video_path = "./videos_storage/"
-        user_email = user_data['user_email']
         user_id = user_data['user_id']
-        saved_video_path = video_path + user_email + "_" + user_id
+        saved_video_path = video_path + "_" + user_id
         return saved_video_path
     
     @staticmethod

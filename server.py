@@ -51,7 +51,7 @@ def end_section(user_data):
     print("[INFO] Client ending section...")
     saved_image_path = general_operation.get_image_path(user_data)
     saved_video_path = general_operation.get_video_path(user_data)
-    video_path = saved_video_path + "/" + user_data['user_email'] + user_data['user_id'] + ".mp4"
+    video_path = saved_video_path + "/" + user_data['user_id'] + ".mp4"
 
     save_result = file_operation.save_video(saved_image_path, video_path)
     if save_result:
