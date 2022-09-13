@@ -8,7 +8,7 @@ import numpy as np
 import io
 import cv2, base64
 import json
-import pymongo
+from pymongo import MongoClient, errors
 
 from ServerTask import *
 
@@ -16,6 +16,9 @@ app = Flask(__name__)
 app.secret_key = 'PHQ@9@PHU@P@NON'
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=False , ping_timeout=600, ping_interval=600, async_handlers=True)
 Payload.max_decode_packets = 500
+
+DOMAIN = 'database'
+PORT = 27017
 
 emotion_result = {
    "1": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
@@ -109,14 +112,22 @@ def image(data_image):
 def save_result():
     data = request.get_json()
     try:
-        mongoDB = pymongo.MongoClient("mongodb://localhost:27017/")
-        mydb = myclient["phq9_database"]
-        mycol = mydb["results"]
-        mycol.insert_one(data)
+        client = MongoClient(
+            host = [ str(DOMAIN) + ":" + str(PORT) ],
+            serverSelectionTimeoutMS = 60000,
+            username = "root",
+            password = "adminPHQ9",
+        )
+
+        db = client['phq9_database']       
+        collection_name = db["results"]
+        collection_name.insert_one(data)
         return "success"
-    except:
+
+    except errors.ServerSelectionTimeoutError as err:
         print("[ERROR] MongoDB connection failed...")
         return "MongoDB connection failed"
+        
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=9000)
