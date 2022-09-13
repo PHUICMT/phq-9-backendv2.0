@@ -8,6 +8,7 @@ import numpy as np
 import io
 import cv2, base64
 import json
+import pymongo
 
 from ServerTask import *
 
@@ -102,6 +103,20 @@ def image(data_image):
         emotion_result[articleStr][resultStr] = current_emotion + 1
     except:
         print("[INFO] Emotion not found...")
+        
+#save result to mongoDB
+@app.route('/api/save-result',methods = ['POST'])
+def save_result():
+    data = request.get_json()
+    try:
+        mongoDB = pymongo.MongoClient("mongodb://localhost:27017/")
+        mydb = myclient["phq9_database"]
+        mycol = mydb["results"]
+        mycol.insert_one(data)
+        return "success"
+    except:
+        print("[ERROR] MongoDB connection failed...")
+        return "MongoDB connection failed"
 
 if __name__ == '__main__':
     socketio.run(app, host="0.0.0.0", port=9000)
