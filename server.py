@@ -22,6 +22,18 @@ Payload.max_decode_packets = 500
 DOMAIN = 'database'
 PORT = 27017
 
+emotion_result_default = {
+   "1": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "2": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "3": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "4": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "5": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "6": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "7": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "8": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+   "9": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
+}
+
 emotion_result = {
    "1": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
    "2": {"fear": 0, "happy": 0, "sad": 0, "neutral": 0},
@@ -63,6 +75,7 @@ def end_section(user_data):
     if save_result:
         print("[INFO] Video is saved...")
         emotion_result_percentage = general_operation.get_emotion_result_percentage(emotion_result)
+        emotion_result = emotion_result_default
         emit('emotion', emotion_result_percentage)
         
 @socketio.on('disconnect')
