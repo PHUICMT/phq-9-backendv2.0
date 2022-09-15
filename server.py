@@ -9,11 +9,13 @@ import io
 import cv2, base64
 import json
 from pymongo import MongoClient, errors
+from flask_cors import CORS
 
 from ServerTask import *
 
 app = Flask(__name__)
 app.secret_key = 'PHQ@9@PHU@P@NON'
+CORS(app, resources={r"/*": {"origins": "*"}})
 socketio = SocketIO(app, cors_allowed_origins="*", engineio_logger=False , ping_timeout=600, ping_interval=600, async_handlers=True)
 Payload.max_decode_packets = 500
 
